@@ -39,9 +39,9 @@
 #include <TauAnalysis/ClassicSVfit/interface/MeasuredTauLepton.h>
 #include <TauAnalysis/ClassicSVfit/interface/svFitHistogramAdapter.h>
 
-#include <LLRHiggsTauTau/NtupleProducer/interface/CutSet.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/LeptonIsoHelper.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/DaughterDataHelpers.h>
+#include <PhysicsTools/NanoTuples/interface/CutSet.h>
+#include <PhysicsTools/NanoTuples/interface/LeptonIsoHelper.h>
+#include <PhysicsTools/NanoTuples/interface/DaughterDataHelpers.h>
 #include <TLorentzVector.h>
 
 #include <vector>

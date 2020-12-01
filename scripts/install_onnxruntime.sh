@@ -12,7 +12,7 @@ INSTALL_DIR="$CMSSW_BASE/ORT_INSTALL"
 [[ -d $INSTALL_DIR ]] && rm -r $INSTALL_DIR
 mkdir $INSTALL_DIR && cd $INSTALL_DIR
 
-curl -s http://hqu.web.cern.ch/hqu/tools/onnxruntime/onnxruntime-1.2.0_ppc_58f53966d.tar.gz -o ort.tgz
+wget http://hqu.web.cern.ch/hqu/tools/onnxruntime/onnxruntime-1.2.0_ppc_58f53966d.tar.gz -O ort.tgz
 tar -xf ort.tgz && rm ort.tgz
 
 sed -i 's@_ONNXRUNTIME_INSTALL_PATH_@'"$INSTALL_DIR"'@g' $INSTALL_DIR/onnxruntime.xml
