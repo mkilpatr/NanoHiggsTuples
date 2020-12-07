@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
 
-def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=False, COMPUTEUPDOWNSVFIT=False):
+def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=False, COMPUTEUPDOWNSVFIT=False, IsMC=False):
     srcMETTag = None
     COMPUTEMETUPDOWNSVFIT = COMPUTEUPDOWNSVFIT
     if USEPAIRMET:

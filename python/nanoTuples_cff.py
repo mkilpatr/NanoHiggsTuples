@@ -4,7 +4,7 @@ from PhysicsTools.NanoTuples.ak15_cff import setupAK15
 from PhysicsTools.NanoTuples.ak8_cff import addParticleNetAK8
 from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
-from PhysicsTools.NanoTuples.taus_cff.py import addTaus
+from PhysicsTools.NanoTuples.taus_cff import addTaus
 
 
 def nanoTuples_customizeVectexTable(process):
@@ -65,7 +65,13 @@ def _fix_tau_global_tag(process):
     process.prefer('GlobalTag')
     return process
 
-def nanoTuples_customizeCommon(process, runOnMC, addAK15=False, addAK8=True, addPFcands=True, addSVFit=True, addTaus=True):
+def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC=False):
+    addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC)
+    addSVFit(process, outTableName='SVFit', IsMC=IsMC)
+    return process
+
+def nanoTuples_customizeCommon(process, runOnMC, addAK15=False, addAK8=True, addPFcands=True):
+    IsMC = True
     pfcand_params = {'srcs': [], 'isPuppiJets':[], 'jetTables':[]}
     if addAK15:
         setupAK15(process, runOnMC=runOnMC)
@@ -79,14 +85,11 @@ def nanoTuples_customizeCommon(process, runOnMC, addAK15=False, addAK8=True, add
         pfcand_params['jetTables'].append('fatJetTable')
     if addPFcands:
         addPFCands(process, outTableName='PFCands', **pfcand_params)
-    if addSVFit:
-        addSVFit(process, outTableName='SVFit', )
-    if addTaus:
-        addTaus(process, outTableName='Taus', USEPAIRMET=True)
 
     nanoTuples_customizeVectexTable(process)
     nanoTuples_customizeMetTable(process)
     nanoTuples_customizeFatJetTable(process, runOnMC=runOnMC)
+    nanoTuples_customizeTaus(process, runOnMC=runOnMC, IsMC=IsMC)
     _fix_tau_global_tag(process)
 
     return process

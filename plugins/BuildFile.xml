@@ -1,30 +1,25 @@
-<use name="SimDataFormats/GeneratorProducts"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/PluginManager"/>
-<use name="DataFormats/RecoCandidate"/>
-<use name="DataFormats/PatCandidates"/>
-<use name="CommonTools/Utils"/>
-<use name="CommonTools/CandAlgos"/>
-<use name="CommonTools/CandUtils"/>
-<use name="LLRHiggsTauTau/NtupleProducer"/>
+<use name="FWCore/ParameterSet"/>
+<use name="SimDataFormats/GeneratorProducts"/>
+<use name="PhysicsTools/NanoTuples"/>
 <use name="EgammaAnalysis/ElectronTools"/>
 <use name="PhysicsTools/KinFitter"/>
 <use name="JetMETCorrections/Modules"/>
-<use name="FWCore/ParameterSet"/>
-<use name="CommonTools/UtilAlgos"/>
-<use name="RecoEgamma/EgammaTools" />
-<use name="RecoEgamma/ElectronIdentification" />
-<use name="HTT-utilities/RecoilCorrections" />
-<use name="RecoVertex/AdaptiveVertexFit"/>
 <library file="*.cc" name="PhysicsToolsNanoTuplesPlugins">
   <use name="DataFormats/PatCandidates"/>
+  <use name="DataFormats/RecoCandidate"/>
   <use name="DataFormats/NanoAOD"/>
+  <use name="DataFormats/Math"/>
   <use name="CommonTools/Utils"/>
+  <use name="CommonTools/CandAlgos"/>
+  <use name="CommonTools/CandUtils"/>
+  <use name="CommonTools/UtilAlgos"/>
   <use name="RecoBTag/FeatureTools"/>
+  <use name="RecoEgamma/EgammaTools" />
+  <use name="RecoEgamma/ElectronIdentification" />
+  <use name="RecoVertex/AdaptiveVertexFit"/>
   <use name="TrackingTools/Records"/>
+  <Flags CPPDEFINES="CMSSW_VERSION=$(shell echo ${CMSSW_VERSION}|sed -e s/CMSSW_// -e s/_//g -e s/patch\.//)"/>
   <flags EDM_PLUGIN="1"/>
-  <use name="TauAnalysis/ClassicSVfit"/>
-  <use name="TauAnalysis/SVfitTF"/>
-  <use name="root"/>
-  <Flags CPPDEFINES="USE_SVFITTF"/>
 </library>

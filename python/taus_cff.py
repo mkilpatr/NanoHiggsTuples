@@ -2,14 +2,17 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
 
-def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False):
+def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False, IsMC=False):
     ##
     ## Taus
     ##
 
     updatedTauName = "slimmedTausNewID" #name of pat::Tau collection with new tau-Ids
-    
-    
+    TAUCUT="tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18" #miniAOD 
+    APPLYTESCORRECTION=False
+    YEAR="2018"
+    TAUDISCRIMINATOR="byIsolationMVA3oldDMwoLTraw"
+
     tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True,
                         updatedTauName = updatedTauName,
                         toKeep = ["deepTau2017v2p1", "2017v2"]  #["2017v1", "dR0p32017v2"]
@@ -63,40 +66,8 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
     
     # EES corrections: https://indico.cern.ch/event/868279/contributions/3665970/attachments/1959265/3267731/FES_9Dec_explained.pdf
     
-    # NominalTESCorrection=-1#in percent\
+    NominalTESCorrection=cms.double(0.0) #in percent\
     APPLYTESCORRECTION = APPLYTESCORRECTION if IsMC else False # always false if data
-    
-    # 2016 data - MVAoldDM2017v2
-    #NomTESUncDM0   = cms.double(1.0)  # in percent, up/down uncertainty of TES
-    #NomTESUncDM1   = cms.double(0.9)  # in percent, up/down uncertainty of TES
-    #NomTESUncDM10  = cms.double(1.1)  # in percent, up/down uncertainty of TES
-    #NomTESUncDM11  = --> Missing <--  # in percent, up/down uncertainty of TES
-    #NomTESCorDM0   = cms.double(-0.6) # DecayMode==0
-    #NomTESCorDM1   = cms.double(-0.5) # DecayMode==1
-    #NomTESCorDM10  = cms.double(0.0)  # DecayMode==10
-    #NomTESCorDM11  = --> Missing <--  # DecayMode==11
-    
-    # 2017 data - MVAoldDM2017v2
-    #if YEAR == 2017:
-    #    NomTESUncDM0   = cms.double(0.8)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM1   = cms.double(0.8)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM10  = cms.double(0.9)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM11  = cms.double(1.0)  # in percent, up/down uncertainty of TES
-    #    NomTESCorDM0   = cms.double(0.7)  # DecayMode==0
-    #    NomTESCorDM1   = cms.double(-0.2) # DecayMode==1
-    #    NomTESCorDM10  = cms.double(0.1)  # DecayMode==10
-    #    NomTESCorDM11  = cms.double(-0.1) # DecayMode==11
-    
-    # 2018 data - MVAoldDM2017v2
-    #if YEAR == 2018:
-    #    NomTESUncDM0   = cms.double(1.1)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM1   = cms.double(0.9)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM10  = cms.double(0.8)  # in percent, up/down uncertainty of TES
-    #    NomTESUncDM11  = --> Missing <--  # in percent, up/down uncertainty of TES
-    #    NomTESCorDM0   = cms.double(-1.3) # DecayMode==0
-    #    NomTESCorDM1   = cms.double(-0.5) # DecayMode==1
-    #    NomTESCorDM10  = cms.double(-1.2) # DecayMode==10
-    #    NomTESCorDM11  = --> Missing <--  # DecayMode==11
     
     # 2016 data - DeepTau2017v2p1
     NomTESUncDM0      = cms.double(0.8)  # in percent, up/down uncertainty of TES
@@ -187,7 +158,8 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        vtxCollection = cms.InputTag("goodPrimaryVertices"),
        cut = cms.string(TAUCUT),
        discriminator = cms.string(TAUDISCRIMINATOR),
-    
+
+       NominalTESCorrection             = NominalTESCorrection,    
        NominalTESUncertaintyDM0         = NomTESUncDM0,
        NominalTESUncertaintyDM1         = NomTESUncDM1,
        NominalTESUncertaintyDM10        = NomTESUncDM10,
@@ -219,7 +191,8 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        year = cms.string(TESyear)
        )
     
-    process.taus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausNewID + process.bareTaus + process.softTaus)
+    process.taus=cms.Task(process.bareTaus,
+                           process.softTaus)
 
     if path is None:
         process.schedule.associate(process.taus)
