@@ -34,9 +34,24 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
                                            METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
     )
 
-    process.svfitTask = cms.Task(
-        process.SVllCandTable,
-        )
+    process.SVFitTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
+        src = cms.InputTag("SVllCandTable"),
+        cut = cms.string(""),
+        name = cms.string(outTableName),
+        singleton = cms.bool(True), # the number of entries is variable
+        extension = cms.bool(True),
+        variables = cms.PSet( P4Vars,
+            dz    = Var("dz()", float, doc = "pfcand info dz", precision=8),
+            fromPV= Var("fromPV()", float, doc = "pfcand info from Primary Vertex", precision=8),
+        ),
+    )
+
+    process.SVFitTable.variables.pt.precision=10
+    process.SVFitTable.variables.eta.precision=12
+    process.SVFitTable.variables.phi.precision=10
+    process.SVFitTable.variables.mass.precision=10
+    process.svfitTask = cms.Task(process.SVllCandTable,
+                                 process.SVFitTable)
 
     if path is None:
         process.schedule.associate(process.svfitTask)
