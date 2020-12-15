@@ -26,42 +26,6 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        cut = cms.string(TAUCUT),
        )
     
-    ##NOT USED FOR NOW, TBD Later
-    process.cleanTaus = cms.EDProducer("PATTauCleaner",
-        src = cms.InputTag("bareTaus"),
-        # preselection (any string-based cut on pat::Tau)
-        preselection = cms.string(
-                'tauID("decayModeFinding") > 0.5 &'
-                ' tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits") > 0.5 &'
-                ' tauID("againstMuonTight") > 0.5 &'
-                ' tauID("againstElectronMedium") > 0.5'
-            ),
-        
-       # overlap checking configurables
-       checkOverlaps = cms.PSet(
-          muons = cms.PSet(
-              src       = cms.InputTag("cleanPatMuons"),
-              algorithm = cms.string("byDeltaR"),
-              preselection        = cms.string(""),
-              deltaR              = cms.double(0.3),
-              checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-              pairCut             = cms.string(""),
-              requireNoOverlaps   = cms.bool(False), # overlaps don't cause the electron to be discared
-              ),
-          electrons = cms.PSet(
-              src       = cms.InputTag("cleanPatElectrons"),
-              algorithm = cms.string("byDeltaR"),
-              preselection        = cms.string(""),
-              deltaR              = cms.double(0.3),
-              checkRecoComponents = cms.bool(False), # don't check if they share some AOD object ref
-              pairCut             = cms.string(""),
-              requireNoOverlaps   = cms.bool(False), # overlaps don't cause the electron to be discared
-              ),
-          ),
-            # finalCut (any string-based cut on pat::Tau)
-            finalCut = cms.string(' '),
-    )
-    
     # TES corrections: https://indico.cern.ch/event/887196/contributions/3743090/attachments/1984772/3306737/TauPOG_TES_20200210.pdf
     
     # EES corrections: https://indico.cern.ch/event/868279/contributions/3665970/attachments/1959265/3267731/FES_9Dec_explained.pdf

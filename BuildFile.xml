@@ -28,6 +28,7 @@
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/VertexReco"/>
 <use name="DataFormats/Common"/>
+<use name="DataFormats/NanoAOD"/>
 <use name="RecoMET/METAlgorithms"/>
 <use name="RecoMET/METPUSubtraction"/>
 <use name="RecoJets/JetProducers"/>
