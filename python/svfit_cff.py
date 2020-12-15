@@ -9,6 +9,16 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
         # MET corrected for central TES and EES shifts of the taus
         srcMETTag = cms.InputTag("ShiftMETcentral")
 
+
+    #Leptons
+    muString = "softMuons"
+    eleString = "softElectrons"
+    tauString = "softTaus"
+    process.softLeptons = cms.EDProducer("CandViewMerger",
+        #src = cms.VInputTag(cms.InputTag("slimmedMuons"), cms.InputTag("slimmedElectrons"),cms.InputTag("slimmedTaus"))
+        src = cms.VInputTag(cms.InputTag(muString), cms.InputTag(eleString),cms.InputTag(tauString))
+    )
+
     BUILDONLYOS = True
     LLCUT="mass>0"
     ##
@@ -17,7 +27,8 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
     decayString="softLeptons softLeptons"
     checkcharge=False
     if BUILDONLYOS:
-        decayString="softLeptons@+ softLeptons@-"
+        #decayString="softLeptons@+ softLeptons@-"
+        decayString=""
         checkcharge=True
     process.barellCand = cms.EDProducer("CandViewShallowCloneCombiner",
                                         decay = cms.string(decayString),
@@ -55,7 +66,8 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
     process.SVFitTable.variables.eta.precision=12
     process.SVFitTable.variables.phi.precision=10
     process.SVFitTable.variables.mass.precision=10
-    process.svfitTask = cms.Task(process.barellCand, 
+    process.svfitTask = cms.Task(process.softLeptons,
+				 process.barellCand, 
 				 process.SVllCandTable,
                                  process.SVFitTable)
 
