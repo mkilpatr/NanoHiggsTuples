@@ -34,9 +34,9 @@
 #include <FWCore/Framework/interface/ESHandle.h>
 #include "DataFormats/Common/interface/ValueMap.h"
 #include <DataFormats/PatCandidates/interface/Electron.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/DaughterDataHelpers.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/CutSet.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/LeptonIsoHelper.h>
+#include <PhysicsTools/NanoTuples/interface/DaughterDataHelpers.h>
+#include <PhysicsTools/NanoTuples/interface/CutSet.h>
+#include <PhysicsTools/NanoTuples/interface/LeptonIsoHelper.h>
 //#include "EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimatorCSA14.h"
 
 #include <vector>

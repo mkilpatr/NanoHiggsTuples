@@ -4,7 +4,10 @@ from PhysicsTools.NanoAOD.common_cff import *
 # Load tools and function definitions
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
-def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False):
+def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nanosec="25"):
+    #constants
+    ELECUT="pt>7"#"gsfTrack.hitPattern().numberOfHits(HitPattern::MISSING_INNER_HITS)<=1 && pt>10"
+
     process.load("RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi")
     #process.load("RecoEgamma.ElectronIdentification.ElectronRegressionValueMapProducer_cfi")
     
@@ -50,8 +53,8 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False):
        rhoCollection = cms.InputTag("fixedGridRhoFastjetAll",""),
        vtxCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
        genCollection = cms.InputTag("prunedGenParticles"),
-       sampleType = cms.int32(LEPTON_SETUP),          
-       setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
+       sampleType = cms.int32(2012),          
+       setup = cms.int32(2012), # define the set of effective areas, rho corrections, etc.
     
        #CUT BASED ELE ID
        #electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-veto"),

@@ -1,9 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-# Load tools and function definitions
-from PhysicsTools.SmuontorUtils.tools.vid_id_tools import *
-
 def addMuon(process, cuts=None, outTableName='Muon', path=None, IsMC=False):
     ### Mu Ghost cleaning
     process.cleanedMu = cms.EDProducer("PATMuonCleanerBySegments",
@@ -23,18 +20,18 @@ def addMuon(process, cuts=None, outTableName='Muon', path=None, IsMC=False):
         genCollection = cms.InputTag("prunedGenParticles"),
         rhoCollection = cms.InputTag("fixedGridRhoFastjetAll",""),
         vtxCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-        sampleType = cms.int32(LEPTON_SETUP),                     
-        setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
+        sampleType = cms.int32(2012),                     
+        setup = cms.int32(2012), # define the set of effective areas, rho corrections, etc.
         cut = cms.string(""),
         flags = cms.PSet(
             ID = cms.string("userFloat('isPFMuon')" ), # PF ID
-            isGood = cms.string(MUCUT)
+            isGood = cms.string("isLooseMuon && pt>5")
         )
     )
     
-    process.muons =  cms.Sequence(process.cleanedMu + process.bareSoftMuons+ process.softMuons)
-    
-    process.muonTask = cms.Task(process.muons)
+    process.muonTask = cms.Task(process.cleanedMu,
+				process.bareSoftMuons,
+				process.softMuons)
 
     if path is None:
         process.schedule.associate(process.muonTask)

@@ -27,9 +27,9 @@
 #include "TrackingTools/GeomPropagators/interface/AnalyticalTrajectoryExtrapolatorToLine.h"
 #include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
 
-#include <LLRHiggsTauTau/NtupleProducer/interface/DaughterDataHelpers.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/CutSet.h>
-#include <LLRHiggsTauTau/NtupleProducer/interface/LeptonIsoHelper.h>
+#include <PhysicsTools/NanoTuples/interface/DaughterDataHelpers.h>
+#include <PhysicsTools/NanoTuples/interface/CutSet.h>
+#include <PhysicsTools/NanoTuples/interface/LeptonIsoHelper.h>
 //#include <ZZAnalysis/AnalysisStep/interface/SIPCalculator.h>
 
 

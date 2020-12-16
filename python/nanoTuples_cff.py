@@ -5,6 +5,8 @@ from PhysicsTools.NanoTuples.ak8_cff import addParticleNetAK8
 from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
 from PhysicsTools.NanoTuples.taus_cff import addTaus
+from PhysicsTools.NanoTuples.muon_cff import addMuon
+from PhysicsTools.NanoTuples.electron_cff import addElec
 
 
 def nanoTuples_customizeVectexTable(process):
