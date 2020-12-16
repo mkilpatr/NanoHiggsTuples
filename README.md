@@ -50,7 +50,7 @@ git cms-merge-topic -u hqucms:particle-net-onnx-variable-len
 ### Get customized NanoAOD producers
 
 ```bash
-git clone https://github.com/mkilpatr/NanoTuples.git PhysicsTools/NanoTuples -b HiggsToTauTau
+git clone git@github.com:mkilpatr/NanoTuples.git PhysicsTools/NanoTuples -b HiggsToTauTau
 ```
 
 ### Install a faster version of ONNXRuntime
