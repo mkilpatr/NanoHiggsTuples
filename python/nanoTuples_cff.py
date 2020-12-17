@@ -6,22 +6,7 @@ from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
 from PhysicsTools.NanoTuples.taus_cff import addTaus
 from PhysicsTools.NanoTuples.muon_cff import addMuon
-#from PhysicsTools.NanoAOD.nano_cff import nanoAOD_addTauIds
 #from PhysicsTools.NanoTuples.electron_cff import addElec
-
-import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
-def nanoAOD_addTauIds(process):
-    updatedTauName = "slimmedTausUpdated"
-    tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True,
-                        updatedTauName = updatedTauName,
-                        toKeep = ["deepTau2017v2p1", "2017v2"]  #["2017v1", "dR0p32017v2"]
-    )
-    
-    tauIdEmbedder.runTauID()
-    process.patTauMVAIDsSeq.insert(process.patTauMVAIDsSeq.index(getattr(process, updatedTauName)),
-                                   process.rerunMvaIsolationSequence)
-    return process
-
 
 def nanoTuples_customizeVectexTable(process):
     process.vertexTable.dlenMin = -1
@@ -81,15 +66,15 @@ def _fix_tau_global_tag(process):
     return process
 
 def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC=False):
+    updatedTauName="slimmedTausUpdated"
     addMuon(process, IsMC=IsMC)
     #addElec(process, IsMC=IsMC)
-    nanoAOD_addTauIds(process)
-    addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC)
+    addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC, updatedTauName=updatedTauName)
     addSVFit(process, outTableName='SVFit', IsMC=IsMC)
     return process
 
 def nanoTuples_customizeCommon(process, runOnMC, addAK15=False, addAK8=True, addPFcands=True):
-    IsMC = True
+    IsMC = runOnMC
     pfcand_params = {'srcs': [], 'isPuppiJets':[], 'jetTables':[]}
     if addAK15:
         setupAK15(process, runOnMC=runOnMC)

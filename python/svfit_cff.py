@@ -47,6 +47,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
                                            usePairMET = cms.bool(USEPAIRMET),
                                            srcMET     = srcMETTag,
 					   SVFitName  = cms.string(outTableName),
+                                           debug      = cms.bool(True),
     )
 
     process.SVFitTable = cms.EDProducer("SimpleCandidateFlatTableProducer",

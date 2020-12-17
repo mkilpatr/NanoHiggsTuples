@@ -2,15 +2,26 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
 
-def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False, IsMC=False):
+def nanoAOD_addTauIds(process, updatedTauName = "slimmedTausUpdated", TAUCUT = ""):
+    tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True, updatedTauName = updatedTauName, 
+        #toKeep = ["deepTau2017v2p1", "2017v2"])
+    )   
+
+    tauIdEmbedder.runTauID()
+
+    process.patTauMVAIDsSeq.insert(process.patTauMVAIDsSeq.index(getattr(process, updatedTauName)),
+                                   process.rerunMvaIsolationSequence)
+
+    return process
+
+def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False, IsMC=False, updatedTauName="slimmedTausUpdated"):
     ##
     ## Taus
     ##
-    PVERTEXCUT="!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2" #cut on good primary vertexes
 
     process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
       src = cms.InputTag("offlineSlimmedPrimaryVertices"),
-      cut = cms.string(PVERTEXCUT),
+      cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
       filter = cms.bool(False), # if True, rejects events . if False, produce emtpy vtx collection
     )
 
@@ -19,12 +30,14 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
     YEAR="2018"
     TAUDISCRIMINATOR="byIsolationMVA3oldDMwoLTraw"
 
+    #(run2_nanoAOD_94XMiniAODv1 | run2_nanoAOD_94X2016 | run2_nanoAOD_94XMiniAODv2 | run2_nanoAOD_102Xv1 | run2_nanoAOD_106Xv1).toModify(process, lambda p : nanoAOD_addTauIds(p, updatedTauName=updatedTauName, TAUCUT=TAUCUT))
+
     # old sequence starts here
     process.bareTaus = cms.EDFilter("PATTauRefSelector",
-       src = cms.InputTag("slimmedTausUpdated"), 
+       src = cms.InputTag("slimmedTausUpdated"),
        cut = cms.string(TAUCUT),
        )
-    
+
     # TES corrections: https://indico.cern.ch/event/887196/contributions/3743090/attachments/1984772/3306737/TauPOG_TES_20200210.pdf
     
     # EES corrections: https://indico.cern.ch/event/868279/contributions/3665970/attachments/1959265/3267731/FES_9Dec_explained.pdf
@@ -154,12 +167,14 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        year = cms.string(TESyear)
        )
 
-    process.taus=cms.Task(process.slimmedTausUpdated,
-			  process.bareTaus,
-			  process.softTaus)
+
+    process.taus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausUpdated + process.bareTaus + process.softTaus)
                          
+    process.tausTask=cms.Task(process.goodPrimaryVertices,
+			      process.bareTaus,
+			      process.softTaus)
 
     if path is None:
-        process.schedule.associate(process.taus)
+        process.schedule.associate(process.tausTask)
     else:
-        getattr(process, path).associate(process.taus)
+        getattr(process, path).associate(process.tausTask)
