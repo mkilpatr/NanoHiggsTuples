@@ -6,7 +6,7 @@ from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
 from PhysicsTools.NanoTuples.taus_cff import addTaus
 from PhysicsTools.NanoTuples.muon_cff import addMuon
-from PhysicsTools.NanoTuples.electron_cff import addElec
+#from PhysicsTools.NanoTuples.electron_cff import addElec
 
 
 def nanoTuples_customizeVectexTable(process):
@@ -69,7 +69,7 @@ def _fix_tau_global_tag(process):
 
 def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC=False):
     addMuon(process, IsMC=IsMC)
-    addElec(process, IsMC=IsMC)
+    #addElec(process, IsMC=IsMC)
     addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC)
     addSVFit(process, outTableName='SVFit', IsMC=IsMC)
     return process

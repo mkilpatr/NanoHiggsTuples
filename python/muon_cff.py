@@ -10,7 +10,7 @@ def addMuon(process, cuts=None, outTableName='Muon', path=None, IsMC=False):
                                        fractionOfSharedSegments = cms.double(0.499))
     
 
-    process.bareSoftMuons = cms.EDFilter("PATMuonRefSmuontor",
+    process.bareSoftMuons = cms.EDFilter("PATMuonRefSelector",
         src = cms.InputTag("cleanedMu"),
         cut = cms.string("isLooseMuon && pt>10")
     )

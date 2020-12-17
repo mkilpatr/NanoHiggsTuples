@@ -12,7 +12,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
 
     #Leptons
     muString = "softMuons"
-    eleString = "softElectrons"
+    eleString = "slimmedElectrons"#"softElectrons"
     tauString = "softTaus"
     process.softLeptons = cms.EDProducer("CandViewMerger",
         #src = cms.VInputTag(cms.InputTag("slimmedMuons"), cms.InputTag("slimmedElectrons"),cms.InputTag("slimmedTaus"))
@@ -27,8 +27,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
     decayString="softLeptons softLeptons"
     checkcharge=False
     if BUILDONLYOS:
-        #decayString="softLeptons@+ softLeptons@-"
-        decayString=""
+        decayString="softLeptons@+ softLeptons@-"
         checkcharge=True
     process.barellCand = cms.EDProducer("CandViewShallowCloneCombiner",
                                         decay = cms.string(decayString),

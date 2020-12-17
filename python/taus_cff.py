@@ -6,6 +6,13 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
     ##
     ## Taus
     ##
+    PVERTEXCUT="!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2" #cut on good primary vertexes
+
+    process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
+      src = cms.InputTag("offlineSlimmedPrimaryVertices"),
+      cut = cms.string(PVERTEXCUT),
+      filter = cms.bool(False), # if True, rejects events . if False, produce emtpy vtx collection
+    )
 
     updatedTauName = "slimmedTausNewID" #name of pat::Tau collection with new tau-Ids
     TAUCUT="tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18" #miniAOD 
@@ -22,7 +29,7 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
     
     # old sequence starts here
     process.bareTaus = cms.EDFilter("PATTauRefSelector",
-       src = cms.InputTag("slimmedTausNewID"), 
+       src = cms.InputTag(updatedTauName), 
        cut = cms.string(TAUCUT),
        )
     
@@ -154,9 +161,11 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
     
        year = cms.string(TESyear)
        )
-    
-    process.taus=cms.Task(process.bareTaus,
-                           process.softTaus)
+
+    process.newtaus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausNewID + process.bareTaus)   
+ 
+    process.taus=cms.Task(process.newtaus, 
+                          process.softTaus)
 
     if path is None:
         process.schedule.associate(process.taus)

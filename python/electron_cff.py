@@ -9,7 +9,6 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
     ELECUT="pt>7"#"gsfTrack.hitPattern().numberOfHits(HitPattern::MISSING_INNER_HITS)<=1 && pt>10"
 
     process.load("RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi")
-    #process.load("RecoEgamma.ElectronIdentification.ElectronRegressionValueMapProducer_cfi")
     
     #**********************
     dataFormat = DataFormat.MiniAOD
@@ -18,7 +17,7 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
     
     process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
     # overwrite a default parameter: for miniAOD, the collection name is a slimmed one
-    process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
+    #process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
     
     from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
     process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
@@ -26,12 +25,10 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
     # Define which IDs we want to produce
     # Each of these two example IDs contains all four standard 
     # cut-based ID working points (only two WP of the PU20bx25 are actually used here).
-    #my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
-    #my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff','RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']
     my_id_modules =[
     'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',    # both 25 and 50 ns cutbased ids produced
     'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_50ns_V1_cff',
-    'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff',                 # recommended for both 50 and 25 ns
+    'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff',                 # recommended for both 50 and 25 ns
     'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff', # will not be produced for 50 ns, triggering still to come
     'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff',    # 25 ns trig
     'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_50ns_Trig_V1_cff',    # 50 ns trig
@@ -57,24 +54,12 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
        setup = cms.int32(2012), # define the set of effective areas, rho corrections, etc.
     
        #CUT BASED ELE ID
-       #electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-veto"),
-       #electronTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight"),
-       #electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-medium"),
-       #electronLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-loose"),
-       #electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
-       #electronTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
-       #electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
-       #electronLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
        electronVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-"+nanosec+"ns-V1-standalone-veto"),
        electronTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-"+nanosec+"ns-V1-standalone-tight"),
        electronMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-"+nanosec+"ns-V1-standalone-medium"),
        electronLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-"+nanosec+"ns-V1-standalone-loose"),
     
        #MVA ELE ID (only for 25ns right now)
-       #eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80"),
-       #eleTightIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90"),
-       #mvaValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Phys14NonTrigValues"),
-       #mvaCategoriesMap = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Phys14NonTrigCategories"),
        eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp80"),
        eleTightIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp90"),
        mvaValuesMap     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"),
@@ -89,17 +74,13 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
             )
        )
     
-    #process.electrons = cms.Sequence(process.egmGsfElectronIDSequence * process.softElectrons)#process.bareSoftElectrons
-    
     egmMod = 'egmGsfElectronIDs'
     mvaMod = 'electronMVAValueMapProducer'
-    regMod = 'electronRegressionValueMapProducer'
     egmSeq = 'egmGsfElectronIDSequence'
     setattr(process,egmMod,process.egmGsfElectronIDs.clone())
     setattr(process,mvaMod,process.electronMVAValueMapProducer.clone())
-    setattr(process,regMod,process.electronRegressionValueMapProducer.clone())
-    setattr(process,egmSeq,cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod)*getattr(process,regMod)))
-    process.electrons = cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod)*getattr(process,regMod) * process.softElectrons)#process.bareSoftElectrons
+    setattr(process,egmSeq,cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod)))
+    process.electrons = cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod) * process.softElectrons)#process.bareSoftElectrons
 
 
     ### ----------------------------------------------------------------------
@@ -128,7 +109,10 @@ def addElec(process, cuts=None, outTableName='Elec', path=None, IsMC=False, nano
     )
 
 
-    process.elecTask = cms.Task(process.electrons)
+    process.elecTask = cms.Task(getattr(process,mvaMod), 
+				getattr(process,egmMod), 
+				process.softElectrons,
+				process.cleanSoftElectrons)
 
     if path is None:
         process.schedule.associate(process.elecTask)
