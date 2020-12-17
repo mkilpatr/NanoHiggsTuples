@@ -6,6 +6,7 @@ from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
 from PhysicsTools.NanoTuples.taus_cff import addTaus
 from PhysicsTools.NanoTuples.muon_cff import addMuon
+from PhysicsTools.NanoAOD.nano_cff import nanoAOD_addTauIds
 #from PhysicsTools.NanoTuples.electron_cff import addElec
 
 
@@ -14,7 +15,6 @@ def nanoTuples_customizeVectexTable(process):
     process.vertexTable.dlenSigMin = -1
     process.svCandidateTable.variables.ntracks = Var("numberOfDaughters()", int, doc="number of tracks")
     return process
-
 
 def nanoTuples_customizeFatJetTable(process, runOnMC, addDeepAK8Probs=False):
     if addDeepAK8Probs:
@@ -70,6 +70,7 @@ def _fix_tau_global_tag(process):
 def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC=False):
     addMuon(process, IsMC=IsMC)
     #addElec(process, IsMC=IsMC)
+    nanoAOD_addTauIds(process)
     addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC)
     addSVFit(process, outTableName='SVFit', IsMC=IsMC)
     return process

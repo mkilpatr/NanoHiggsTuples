@@ -14,22 +14,14 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
       filter = cms.bool(False), # if True, rejects events . if False, produce emtpy vtx collection
     )
 
-    updatedTauName = "slimmedTausNewID" #name of pat::Tau collection with new tau-Ids
     TAUCUT="tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18" #miniAOD 
     APPLYTESCORRECTION=False
     YEAR="2018"
     TAUDISCRIMINATOR="byIsolationMVA3oldDMwoLTraw"
 
-    tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True,
-                        updatedTauName = updatedTauName,
-                        toKeep = ["deepTau2017v2p1", "2017v2"]  #["2017v1", "dR0p32017v2"]
-    )
-    
-    tauIdEmbedder.runTauID()
-    
     # old sequence starts here
     process.bareTaus = cms.EDFilter("PATTauRefSelector",
-       src = cms.InputTag(updatedTauName), 
+       src = cms.InputTag("slimmedTausUpdated"), 
        cut = cms.string(TAUCUT),
        )
     
@@ -162,10 +154,9 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        year = cms.string(TESyear)
        )
 
-    process.newtaus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausNewID + process.bareTaus)   
- 
-    process.taus=cms.Task(process.newtaus, 
-                          process.softTaus)
+    process.taus=cms.Task(process.bareTaus,
+			  process.softTaus)
+                         
 
     if path is None:
         process.schedule.associate(process.taus)
