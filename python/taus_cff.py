@@ -154,7 +154,8 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        year = cms.string(TESyear)
        )
 
-    process.taus=cms.Task(process.bareTaus,
+    process.taus=cms.Task(process.slimmedTausUpdated,
+			  process.bareTaus,
 			  process.softTaus)
                          
 

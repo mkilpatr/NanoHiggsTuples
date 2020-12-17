@@ -6,8 +6,21 @@ from PhysicsTools.NanoTuples.pfcands_cff import addPFCands
 from PhysicsTools.NanoTuples.svfit_cff import addSVFit 
 from PhysicsTools.NanoTuples.taus_cff import addTaus
 from PhysicsTools.NanoTuples.muon_cff import addMuon
-from PhysicsTools.NanoAOD.nano_cff import nanoAOD_addTauIds
+#from PhysicsTools.NanoAOD.nano_cff import nanoAOD_addTauIds
 #from PhysicsTools.NanoTuples.electron_cff import addElec
+
+import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
+def nanoAOD_addTauIds(process):
+    updatedTauName = "slimmedTausUpdated"
+    tauIdEmbedder = tauIdConfig.TauIDEmbedder(process, cms, debug = True,
+                        updatedTauName = updatedTauName,
+                        toKeep = ["deepTau2017v2p1", "2017v2"]  #["2017v1", "dR0p32017v2"]
+    )
+    
+    tauIdEmbedder.runTauID()
+    process.patTauMVAIDsSeq.insert(process.patTauMVAIDsSeq.index(getattr(process, updatedTauName)),
+                                   process.rerunMvaIsolationSequence)
+    return process
 
 
 def nanoTuples_customizeVectexTable(process):
