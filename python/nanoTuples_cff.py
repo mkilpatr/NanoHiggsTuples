@@ -69,7 +69,7 @@ def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC
     updatedTauName="slimmedTausUpdated"
     addMuon(process, IsMC=IsMC)
     #addElec(process, IsMC=IsMC)
-    addTaus(process, outTableName='Taus', USEPAIRMET=True, IsMC=IsMC, updatedTauName=updatedTauName)
+    addTaus(process, outTableName='Taus', USEPAIRMET=False, IsMC=IsMC, updatedTauName=updatedTauName)
     addSVFit(process, outTableName='SVFit', IsMC=IsMC)
     return process
 
