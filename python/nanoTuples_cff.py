@@ -67,10 +67,12 @@ def _fix_tau_global_tag(process):
 
 def nanoTuples_customizeTaus(process, runOnMC, addSVfit=True, addtaus=True, IsMC=False):
     updatedTauName="slimmedTausUpdated"
+    USEPAIRMET=False
+    APPLYMETCORR=False
     addMuon(process, IsMC=IsMC)
     #addElec(process, IsMC=IsMC)
-    addTaus(process, outTableName='Taus', USEPAIRMET=False, IsMC=IsMC, updatedTauName=updatedTauName)
-    addSVFit(process, outTableName='SVFit', IsMC=IsMC)
+    addTaus(process, outTableName='Taus', USEPAIRMET=USEPAIRMET, IsMC=IsMC, updatedTauName=updatedTauName)
+    addSVFit(process, outTableName='SVFit', USEPAIRMET=USEPAIRMET, IsMC=IsMC, APPLYMETCORR=APPLYMETCORR)
     return process
 
 def nanoTuples_customizeCommon(process, runOnMC, addAK15=False, addAK8=True, addPFcands=True):

@@ -143,7 +143,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   iEvent.getByToken(theCandidateTag, pairHandle);
   
   unsigned int pairNumber = pairHandle->size();
-
+  unsigned int metNumber = 0;
 
   // MET class type changes if using MVA MEt or 'ordinary' MEt
   
@@ -157,10 +157,55 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   // intialize MET
   double METx = 0.;
   double METy = 0.;
-  std::vector<float> METxVec, METyVec, uncorrMETx, uncorrMETy, significance, covMET00, covMET10, covMET01, covMET11; 
+  float significance = -999.;
+  std::vector<float> METxVec, METyVec, uncorrMETx, uncorrMETy, significanceVec, covMET00, covMET10, covMET01, covMET11; 
   TMatrixD covMET(2, 2);
 
   iEvent.getByToken(theMETTag, METHandle);
+
+  // initialize MET once if not using PairMET
+  if (!_usePairMET)
+  {   
+     metNumber = METHandle->size();
+     if (metNumber != 1)     
+        edm::LogWarning("pfMetHasNotSizeOne") << "(ClassicSVfitInterface) Warning! Using single pf MEt, but input MEt collection size is different from 1"
+                                                           << "   --> using MET entry num. 0";
+     const pat::MET& patMET = (*METHandle)[0];
+     METx = patMET.px();
+     METy = patMET.py();
+     METxVec.push_back(METx);
+     METyVec.push_back(METy);
+
+     Handle<double> significanceHandle;
+     Handle<math::Error<2>::type> covHandle;
+
+     iEvent.getByToken (theSigTag, significanceHandle);
+     iEvent.getByToken (theCovTag, covHandle);
+     
+     covMET[0][0] = (*covHandle)(0,0);
+     covMET[1][0] = (*covHandle)(1,0);
+     covMET[0][1] = covMET[1][0]; // (1,0) is the only one saved
+     covMET[1][1] = (*covHandle)(1,1);
+     covMET00.push_back(covMET[0][0]);
+     covMET10.push_back(covMET[1][0]);
+     covMET01.push_back(covMET[0][1]);
+     covMET11.push_back(covMET[1][1]);
+
+     significance = (float) (*significanceHandle);
+     significanceVec.push_back(significance);
+     
+     // protection against singular matrices
+     if (covMET[0][0] == 0 && covMET[1][0] == 0 && covMET[0][1] == 0 && covMET[1][1] == 0)
+        edm::LogWarning("SingularCovarianceMatrix") << "(ClassicSVfitInterface) Warning! Input covariance matrix is singular"
+                                                    << "   --> SVfit algorithm will probably crash...";
+
+     if(_debug){      
+       cout << " -------- CLASSIC SVIFT MET ---------" << endl;
+       cout << "MET       : " << patMET.px() << " / " << patMET.py() << endl;
+       cout << " -------- ----------------- ---------" << endl;
+     }
+  }
+  
 
   // Output collection
   std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
@@ -203,7 +248,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
       // const PFMET* pfMET = (PFMET*) &((*METHandle)[0]) ; // all this to transform the type of the pointer!
       const pat::MET* patMET = &((*METHandle)[i]);
       const reco::METCovMatrix& covMETbuf = patMET->getSignificanceMatrix();
-      significance.push_back((float) patMET->significance());
+      significanceVec.push_back((float) patMET->significance());
 
       METx = patMET->px();
       METy = patMET->py();
@@ -385,7 +430,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("MEt_cov01", 		covMET01 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("MEt_cov10", 		covMET10 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("MEt_cov11", 		covMET11 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_significance", 	significance 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("MEt_significance", 	significanceVec , 	"", nanoaod::FlatTable::FloatColumn, 10);
  
   iEvent.put(std::move(candTable),SVFitName_);
   iEvent.put(std::move(selCandPf)); 

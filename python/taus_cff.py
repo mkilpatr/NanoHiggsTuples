@@ -168,8 +168,6 @@ def addTaus(process, cuts=None, outTableName='Taus', path=None, USEPAIRMET=False
        )
 
 
-    process.taus=cms.Sequence(process.rerunMvaIsolationSequence + process.slimmedTausUpdated + process.bareTaus + process.softTaus)
-                         
     process.tausTask=cms.Task(process.goodPrimaryVertices,
 			      process.bareTaus,
 			      process.softTaus)

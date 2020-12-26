@@ -5,6 +5,7 @@
 <use name="PhysicsTools/NanoTuples"/>
 <use name="EgammaAnalysis/ElectronTools"/>
 <use name="PhysicsTools/KinFitter"/>
+<use name="HTT-utilities/RecoilCorrections" />
 <use name="JetMETCorrections/Modules"/>
 <library file="*.cc" name="PhysicsToolsNanoTuplesPlugins">
   <use name="DataFormats/PatCandidates"/>

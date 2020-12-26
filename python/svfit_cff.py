@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
-def addMETProcesses(process, cuts=None, path=None, USEPAIRMET=True, COMPUTEUPDOWNSVFIT=False, IsMC=False, APPLYMETCORR=True):
+def addMETProcesses(process, cuts=None, path=None, USEPAIRMET=False, COMPUTEUPDOWNSVFIT=False, IsMC=False, APPLYMETCORR=False):
     process.METSequence = cms.Sequence()
     if USEPAIRMET:
         print "Using pair MET (MVA MET)"
@@ -81,24 +81,24 @@ def addMETProcesses(process, cuts=None, path=None, USEPAIRMET=True, COMPUTEUPDOW
         else:
             raise ValueError("Z-recoil corrections for PFMET not implemented yet !!")
     
-    
-    srcMETTag = None
+    #process.nanoSequenceCommon.insert(process.nanoSequenceCommon.index(process.jetSequence),cms.Sequence(process.METSequence))
+
+    return process
+
+def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=False, COMPUTEUPDOWNSVFIT=False, IsMC=False, APPLYMETCORR=False):
+    addMETProcesses(process, USEPAIRMET=USEPAIRMET, COMPUTEUPDOWNSVFIT=COMPUTEUPDOWNSVFIT, IsMC=IsMC, APPLYMETCORR=APPLYMETCORR)
+
     if USEPAIRMET:
       srcMETTag = cms.InputTag("corrMVAMET") if (IsMC and APPLYMETCORR) else cms.InputTag("MVAMET", "MVAMET")
     else:
       # MET corrected for central TES and EES shifts of the taus
       srcMETTag = cms.InputTag("ShiftMETcentral")
 
-    return process
-
-def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=True, COMPUTEUPDOWNSVFIT=False, IsMC=False, APPLYMETCORR=True):
-    addMETProcesses(process, USEPAIRMET=USEPAIRMET, COMPUTEUPDOWNSVFIT=COMPUTEUPDOWNSVFIT, IsMC=IsMC, APPLYMETCORR=APPLYMETCORR)
     #Leptons
     muString = "softMuons"
     eleString = "slimmedElectrons"#"softElectrons"
     tauString = "softTaus"
     process.softLeptons = cms.EDProducer("CandViewMerger",
-        #src = cms.VInputTag(cms.InputTag("slimmedMuons"), cms.InputTag("slimmedElectrons"),cms.InputTag("slimmedTaus"))
         src = cms.VInputTag(cms.InputTag(muString), cms.InputTag(eleString),cms.InputTag(tauString))
     )
 
@@ -123,6 +123,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Tru
     ## ----------------------------------------------------------------------
     #if USECLASSICSVFIT:
     #    print "Using CLASSIC_SV_FIT"
+    DEBUG = True
     process.SVllCandTable = cms.EDProducer("ClassicSVfitInterface",
                                            srcPairs   = cms.InputTag("barellCand"),
                                            srcSig     = cms.InputTag("METSignificance", "METSignificance"),
@@ -130,7 +131,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Tru
                                            usePairMET = cms.bool(USEPAIRMET),
                                            srcMET     = srcMETTag,
 					   SVFitName  = cms.string(outTableName),
-                                           debug      = cms.bool(True),
+                                           debug      = cms.bool(DEBUG),
     )
 
     process.SVFitTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -151,6 +152,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Tru
     process.SVFitTable.variables.mass.precision=10
     process.svfitTask = cms.Task(process.softLeptons,
 				 process.barellCand, 
+				 process.METSignificance,
 				 process.ShiftMETcentral,
 				 process.SVllCandTable,
                                  process.SVFitTable)
