@@ -130,6 +130,7 @@ SVFitName_(iConfig.getParameter<std::string>("SVFitName"))
   inputFile_visPtResolution_ = new TFile(inputFileName_visPtResolution.fullPath().data());*/
 
   produces<nanoaod::FlatTable>(SVFitName_);
+  produces<nanoaod::FlatTable>(SVFitName_+"MET");
   produces<edm::PtrVector<reco::Candidate> >();
   
 }
@@ -193,7 +194,6 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
 
      significance = (float) (*significanceHandle);
      significanceVec.push_back(significance);
-     
      // protection against singular matrices
      if (covMET[0][0] == 0 && covMET[1][0] == 0 && covMET[0][1] == 0 && covMET[1][1] == 0)
         edm::LogWarning("SingularCovarianceMatrix") << "(ClassicSVfitInterface) Warning! Input covariance matrix is singular"
@@ -215,7 +215,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   {    
     //Get Candidate names
     edm::Ptr<reco::Candidate> c = pairHandle->ptrAt(i);
-    //selCandPf->push_back(c);
+    selCandPf->push_back(c);
 
     // Get the pair and the two leptons composing it
     const CompositeCandidate& pairBuf = (*pairHandle)[i];
@@ -327,7 +327,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     else if (pType == kHadHad) kappa = 5.;  // tautau
     else                       kappa = 3.;  // ee, emu, mumu
     
-    selCandPf->push_back(c);
+    //selCandPf->push_back(c);
     // only run SVfit if taus are passing discriminator, skip mumu and ee pairs, apply very loose quality cuts on objects
     // if (isGoodDR && GoodPairFlag)
     if (IsInteresting(l1, l2))
@@ -386,52 +386,61 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
         
         if(_debug){
           cout << "--- SVFit Output Debug ---" << endl;
-          cout << "SVfitMass           = " << SVfitMass.at(i) << endl;
-          cout << "SVfitTransverseMass = " << SVfitTransverseMass.at(i) << endl;
-          cout << "SVpt 	             = " << SVpt.at(i) << endl;
-          cout << "SVeta	             = " << SVeta.at(i) << endl;
-          cout << "SVphi	             = " << SVphi.at(i) << endl;
+          cout << "SVfitMass           = " << SVfitMass.back() << endl;
+          cout << "SVfitTransverseMass = " << SVfitTransverseMass.back() << endl;
+          cout << "SVpt 	             = " << SVpt.back() << endl;
+          cout << "SVeta	             = " << SVeta.back() << endl;
+          cout << "SVphi	             = " << SVphi.back() << endl;
         }
 
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau1(l1->pt(), l1->eta(), l1->phi(), mass1);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau2(l2->pt(), l2->eta(), l2->phi(), mass2);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredDiTauSystem = measuredTau1 + measuredTau2;
-        ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> fittedDiTauSystem(SVpt.at(i), SVeta.at(i), SVphi.at(i), SVfitMass.at(i));
+        ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> fittedDiTauSystem(SVpt.back(), SVeta.back(), SVphi.back(), SVfitMass.back());
         Vector fittedMET = (fittedDiTauSystem.Vect() - measuredDiTauSystem.Vect());
         SVMETRho.push_back((float)fittedMET.Rho());
         SVMETPhi.push_back((float)fittedMET.Phi());
       }
-      else
+      else{
         SVfitMass.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
-
+        SVfitTransverseMass.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        SVpt.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        SVeta.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        SVphi.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        SVMETRho.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        SVMETPhi.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      }
+    } else {
+      SVfitMass.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVfitTransverseMass.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVpt.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVeta.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVphi.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVMETRho.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      SVMETPhi.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
     } // end of quality checks IF
-
-    if(_debug){    
-      cout << "-----------------" << endl;
-      cout << "Central (M, pt, eta): " << SVfitMass.at(i) << " / " << SVpt.at(i) << " / " << SVeta.at(i) << endl;
-      cout << "-----------------" << endl;
-    }
-  }
+  }// end for loop over pairs
   auto candTable = std::make_unique<nanoaod::FlatTable>(selCandPf->size(), SVFitName_, false); 
   candTable->setDoc("Save SV Fit candidate reconstruction");
   // add user floats: SVfit mass, met properties, etc..  
-  candTable->addColumn<float>("SVfit_Mass", 		SVfitMass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_TransverseMass", 	SVfitTransverseMass, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_pt", 		SVpt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_eta", 		SVeta 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_phi", 		SVphi 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_METRho", 		SVMETRho 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("SVfit_METPhi", 		SVMETPhi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_px", 		METxVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_py", 		METyVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("uncorrMEt_px", 		uncorrMETx 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("uncorrMEt_py", 		uncorrMETy 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_cov00",		covMET00 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_cov01", 		covMET01 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_cov10", 		covMET10 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_cov11", 		covMET11 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("MEt_significance", 	significanceVec , 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("Mass", 		SVfitMass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("TransverseMass", 	SVfitTransverseMass, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("Pt", 		SVpt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("Eta", 		SVeta 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("Phi", 		SVphi 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("METRho", 		SVMETRho 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("METPhi", 		SVMETPhi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+
+  auto singleTable = std::make_unique<nanoaod::FlatTable>(1, SVFitName_+"MET", false); 
+  singleTable->addColumn<float>("px", 		METxVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("py", 		METyVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov00",		covMET00 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov01", 		covMET01 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov10", 		covMET10 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov11", 		covMET11 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("significance", 	significanceVec , 	"", nanoaod::FlatTable::FloatColumn, 10);
  
+  iEvent.put(std::move(singleTable),SVFitName_+"MET");
   iEvent.put(std::move(candTable),SVFitName_);
   iEvent.put(std::move(selCandPf)); 
 }

@@ -123,7 +123,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
     ## ----------------------------------------------------------------------
     #if USECLASSICSVFIT:
     #    print "Using CLASSIC_SV_FIT"
-    DEBUG = True
+    DEBUG = False
     process.SVllCandTable = cms.EDProducer("ClassicSVfitInterface",
                                            srcPairs   = cms.InputTag("barellCand"),
                                            srcSig     = cms.InputTag("METSignificance", "METSignificance"),
@@ -140,10 +140,7 @@ def addSVFit(process, cuts=None, outTableName='SVFit', path=None, USEPAIRMET=Fal
         name = cms.string(outTableName),
         singleton = cms.bool(False), # the number of entries is variable
         extension = cms.bool(True),
-        variables = cms.PSet( P4Vars,
-            dz    = Var("dz()", float, doc = "pfcand info dz", precision=8),
-            fromPV= Var("fromPV()", float, doc = "pfcand info from Primary Vertex", precision=8),
-        ),
+        variables = cms.PSet( P4Vars,),
     )
 
     process.SVFitTable.variables.pt.precision=10
