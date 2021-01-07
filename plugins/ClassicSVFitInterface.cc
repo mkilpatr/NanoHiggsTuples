@@ -159,7 +159,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   double METx = 0.;
   double METy = 0.;
   float significance = -999.;
-  std::vector<float> METxVec, METyVec, uncorrMETx, uncorrMETy, significanceVec, covMET00, covMET10, covMET01, covMET11; 
+  std::vector<float> METxVec, METyVec, uncorrMETx, uncorrMETy, significanceVec, covMET00, covMET10, covMET01, covMET11, isValid, isInteresting; 
   TMatrixD covMET(2, 2);
 
   iEvent.getByToken(theMETTag, METHandle);
@@ -208,7 +208,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   
 
   // Output collection
-  std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
+  std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi, channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid, tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid;
 
   // loop on all the pairs
   for (unsigned int i = 0; i < pairNumber; ++i)
@@ -393,6 +393,19 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
           cout << "SVphi	             = " << SVphi.back() << endl;
         }
 
+        channel.push_back((float)pType);
+        tau1pt.push_back(measuredTauLeptons.at(0).pt());
+        tau1eta.push_back(measuredTauLeptons.at(0).eta());
+        tau1phi.push_back(measuredTauLeptons.at(0).phi());
+        tau1mass.push_back(measuredTauLeptons.at(0).mass());
+        tau1decaymode.push_back(measuredTauLeptons.at(0).decayMode());
+        tau1pdgid.push_back(measuredTauLeptons.at(0).type());
+        tau2pt.push_back(measuredTauLeptons.at(1).pt());
+        tau2eta.push_back(measuredTauLeptons.at(1).eta());
+        tau2phi.push_back(measuredTauLeptons.at(1).phi());
+        tau2mass.push_back(measuredTauLeptons.at(1).mass());
+        tau2decaymode.push_back(measuredTauLeptons.at(1).decayMode());
+        tau2pdgid.push_back(measuredTauLeptons.at(1).type());
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau1(l1->pt(), l1->eta(), l1->phi(), mass1);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau2(l2->pt(), l2->eta(), l2->phi(), mass2);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredDiTauSystem = measuredTau1 + measuredTau2;
@@ -409,6 +422,19 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
         SVphi.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
         SVMETRho.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
         SVMETPhi.push_back(-111); // -111: SVfit failed (cfr: -999: SVfit not computed)
+        channel.push_back(-111);
+        tau1pdgid.push_back(-999);
+        tau1pt.push_back(-111);
+        tau1eta.push_back(-111);
+        tau1phi.push_back(-111);
+        tau1mass.push_back(-111);
+        tau1decaymode.push_back(-111);
+        tau2pdgid.push_back(-999);
+        tau2pt.push_back(-111);
+        tau2eta.push_back(-111);
+        tau2phi.push_back(-111);
+        tau2mass.push_back(-111);
+        tau2decaymode.push_back(-111);
       }
     } else {
       SVfitMass.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
@@ -418,27 +444,69 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
       SVphi.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
       SVMETRho.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
       SVMETPhi.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
+      channel.push_back(-999);
+      tau1pdgid.push_back(-999);
+      tau1pt.push_back(-999);
+      tau1eta.push_back(-999);
+      tau1phi.push_back(-999);
+      tau1mass.push_back(-999);
+      tau1decaymode.push_back(-999);
+      tau2pdgid.push_back(-999);
+      tau2pt.push_back(-999);
+      tau2eta.push_back(-999);
+      tau2phi.push_back(-999);
+      tau2mass.push_back(-999);
+      tau2decaymode.push_back(-999);
     } // end of quality checks IF
   }// end for loop over pairs
+  int _isValid = 0;
+  int _isInteresting = 0;
+  for(long unsigned int i = 0; i != SVfitMass.size(); i++){
+    if(SVfitMass[i] >= 0){
+      _isValid = 1;
+      _isInteresting = 1;
+      break;
+    } else if(SVfitMass[i] >= -200){
+      _isInteresting = 1;
+    }
+  }
+  isValid.push_back(_isValid);
+  isInteresting.push_back(_isInteresting);
+
   auto candTable = std::make_unique<nanoaod::FlatTable>(selCandPf->size(), SVFitName_, false); 
   candTable->setDoc("Save SV Fit candidate reconstruction");
   // add user floats: SVfit mass, met properties, etc..  
   candTable->addColumn<float>("Mass", 		SVfitMass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("TransverseMass", 	SVfitTransverseMass, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("TransverseMass", SVfitTransverseMass, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("Pt", 		SVpt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("Eta", 		SVeta 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("Phi", 		SVphi 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("METRho", 		SVMETRho 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  candTable->addColumn<float>("METPhi", 		SVMETPhi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("METRho", 	SVMETRho 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("METPhi", 	SVMETPhi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("channel", 	channel 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1Mass", 	tau1mass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1pdgId", 	tau1pdgid 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1Pt", 	tau1pt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1Eta", 	tau1eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1Phi", 	tau1phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1DM", 	tau1decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2Mass", 	tau2mass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2pdgId", 	tau2pdgid 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2Pt", 	tau2pt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2Eta", 	tau2eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2Phi", 	tau2phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2DM", 	tau2decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
 
   auto singleTable = std::make_unique<nanoaod::FlatTable>(1, SVFitName_+"MET", false); 
   singleTable->addColumn<float>("px", 		METxVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   singleTable->addColumn<float>("py", 		METyVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  singleTable->addColumn<float>("cov00",		covMET00 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  singleTable->addColumn<float>("cov01", 		covMET01 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  singleTable->addColumn<float>("cov10", 		covMET10 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  singleTable->addColumn<float>("cov11", 		covMET11 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
-  singleTable->addColumn<float>("significance", 	significanceVec , 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov00",	covMET00 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov01", 	covMET01 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov10", 	covMET10 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("cov11", 	covMET11 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<float>("significance", significanceVec , 	"", nanoaod::FlatTable::FloatColumn, 10);
+  singleTable->addColumn<int>("isInteresting",  isInteresting 	, 	"", nanoaod::FlatTable::IntColumn);
+  singleTable->addColumn<int>("isValid", 	isValid 	, 	"", nanoaod::FlatTable::IntColumn);
  
   iEvent.put(std::move(singleTable),SVFitName_+"MET");
   iEvent.put(std::move(candTable),SVFitName_);
