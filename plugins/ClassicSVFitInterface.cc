@@ -208,7 +208,9 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   
 
   // Output collection
-  std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi, channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid, tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid;
+  std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
+  std::vector<float> channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid; 
+  std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid;
 
   // loop on all the pairs
   for (unsigned int i = 0; i < pairNumber; ++i)
@@ -628,6 +630,20 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     return true; // passed all requirements
   }
 
+  else if (pType == kEMu)
+  {
+    dau1 = (apdg1 == 11 ? l1 : l2);
+    dau2 = (apdg1 == 13 ? l2 : l1);
+
+    if (dau1->pt() < 13.)
+      return false;
+
+    if (dau2->pt() < 10.)
+      return false;
+
+    return true; // passed all requirements
+  }
+
   else if (pType == kEHad)
   {
     dau1 = (apdg1 == 11 ? l1 : l2);
@@ -695,9 +711,6 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     return false;
   
   else if (pType == kEE)
-    return false;
-  
-  else if (pType == kEMu)
     return false;
   
   else
