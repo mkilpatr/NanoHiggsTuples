@@ -52,6 +52,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <bitset>
 
 using namespace edm;
 using namespace std;
@@ -210,7 +211,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   // Output collection
   std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
   std::vector<float> channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid; 
-  std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid;
+  std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid, tau1IDjet, tau2IDjet;
 
   // loop on all the pairs
   for (unsigned int i = 0; i < pairNumber; ++i)
@@ -240,6 +241,48 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     float l2_iso = -1.;
     if (l1Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay) l1_iso = userdatahelpers::getUserFloat(l1,"byDeepTau2017v2p1VSjetraw");
     if (l2Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay) l2_iso = userdatahelpers::getUserFloat(l2,"byDeepTau2017v2p1VSjetraw");
+
+    int iso_l1_jet = 0x0;
+    int iso_l2_jet = 0x0;
+    if(l1Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay){
+      iso_l1_jet = userdatahelpers::getUserInt(l1,"byVVTightDeepTau2017v2p1VSjet") << 7 |
+                   userdatahelpers::getUserInt(l1,"byVTightDeepTau2017v2p1VSjet") << 6 |
+                   userdatahelpers::getUserInt(l1,"byTightDeepTau2017v2p1VSjet") << 5 |
+                   userdatahelpers::getUserInt(l1,"byMediumDeepTau2017v2p1VSjet") << 4 |
+                   userdatahelpers::getUserInt(l1,"byLooseDeepTau2017v2p1VSjet") << 3 |
+                   userdatahelpers::getUserInt(l1,"byVLooseDeepTau2017v2p1VSjet") << 2 |
+                   userdatahelpers::getUserInt(l1,"byVVLooseDeepTau2017v2p1VSjet") << 1 |
+                   userdatahelpers::getUserInt(l1,"byVVVLooseDeepTau2017v2p1VSjet") << 0;
+    }
+
+    if(l2Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay){
+      iso_l2_jet = userdatahelpers::getUserInt(l2,"byVVTightDeepTau2017v2p1VSjet") << 7 |
+                   userdatahelpers::getUserInt(l2,"byVTightDeepTau2017v2p1VSjet") << 6 |
+                   userdatahelpers::getUserInt(l2,"byTightDeepTau2017v2p1VSjet") << 5 |
+                   userdatahelpers::getUserInt(l2,"byMediumDeepTau2017v2p1VSjet") << 4 |
+                   userdatahelpers::getUserInt(l2,"byLooseDeepTau2017v2p1VSjet") << 3 |
+                   userdatahelpers::getUserInt(l2,"byVLooseDeepTau2017v2p1VSjet") << 2 |
+                   userdatahelpers::getUserInt(l2,"byVVLooseDeepTau2017v2p1VSjet") << 1 |
+                   userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") << 0;
+    }
+
+    tau1IDjet.push_back(iso_l1_jet);
+    tau2IDjet.push_back(iso_l2_jet);
+
+    //if(_debug && l1Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay){
+    //  cout << "What are the Lepton Discriminators" << endl;
+    //  cout << "Lepton 1: " << userdatahelpers::getUserFloat(l1,"byDeepTau2017v2p1VSjetraw") << endl;
+    //  cout << "Lepton 1: " << userdatahelpers::getUserInt(l1,"byVVVLooseDeepTau2017v2p1VSjet") << endl;
+    //  cout << "Lepton 1: " << userdatahelpers::getUserInt(l1,"byVVLooseDeepTau2017v2p1VSjet") << endl;
+    //}
+    //
+    //if(_debug && l2Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay){
+    //  cout << "What are the Lepton Discriminators" << endl;
+    //  cout << "Lepton 2: " << userdatahelpers::getUserFloat(l2,"byDeepTau2017v2p1VSjetraw") << endl;
+    //  cout << "Lepton 2: " << userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") << endl;
+    //  cout << "Lepton 2: " << userdatahelpers::getUserInt(l2,"byVVLooseDeepTau2017v2p1VSjet") << endl;
+    //}
+    
 
     bool swi = Switch (l1Type, l1->pt(), l1_iso, l2Type, l2->pt(), l2_iso);
   
@@ -492,12 +535,14 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("tau1Eta", 	tau1eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau1Phi", 	tau1phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau1DM", 	tau1decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<int>("tau1IDjet", 	tau1IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
   candTable->addColumn<float>("tau2Mass", 	tau2mass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2pdgId", 	tau2pdgid 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2Pt", 	tau2pt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2Eta", 	tau2eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2Phi", 	tau2phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2DM", 	tau2decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<int>("tau2IDjet", 	tau2IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
 
   auto singleTable = std::make_unique<nanoaod::FlatTable>(1, SVFitName_+"MET", false); 
   singleTable->addColumn<float>("px", 		METxVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
