@@ -211,7 +211,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   // Output collection
   std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
   std::vector<float> channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid; 
-  std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid, tau1IDjet, tau2IDjet;
+  std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid, tau1IDjet, tau2IDjet, tau1Isojet, tau2Isojet;
 
   // loop on all the pairs
   for (unsigned int i = 0; i < pairNumber; ++i)
@@ -240,7 +240,11 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     float l1_iso = -1.;
     float l2_iso = -1.;
     if (l1Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay) l1_iso = userdatahelpers::getUserFloat(l1,"byDeepTau2017v2p1VSjetraw");
+    else if(l1Type == classic_svFit::MeasuredTauLepton::kTauToElecDecay) l1_iso = userdatahelpers::getUserFloat(l1,"ElectronMVAEstimatorRun2Fall17IsoV1Values");
+    else if(l1Type == classic_svFit::MeasuredTauLepton::kTauToMuDecay) l1_iso = userdatahelpers::getUserFloat(l1,"combRelIsoPF");
     if (l2Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay) l2_iso = userdatahelpers::getUserFloat(l2,"byDeepTau2017v2p1VSjetraw");
+    else if(l2Type == classic_svFit::MeasuredTauLepton::kTauToElecDecay) l2_iso = userdatahelpers::getUserFloat(l2,"ElectronMVAEstimatorRun2Fall17IsoV1Values");
+    else if(l2Type == classic_svFit::MeasuredTauLepton::kTauToMuDecay) l2_iso = userdatahelpers::getUserFloat(l2,"combRelIsoPF");
 
     int iso_l1_jet = 0x0;
     int iso_l2_jet = 0x0;
@@ -253,6 +257,12 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
                    userdatahelpers::getUserInt(l1,"byVLooseDeepTau2017v2p1VSjet") << 2 |
                    userdatahelpers::getUserInt(l1,"byVVLooseDeepTau2017v2p1VSjet") << 1 |
                    userdatahelpers::getUserInt(l1,"byVVVLooseDeepTau2017v2p1VSjet") << 0;
+    } else if(l1Type == classic_svFit::MeasuredTauLepton::kTauToElecDecay){
+      iso_l1_jet = userdatahelpers::getUserInt(l1,"cutBasedElectronID-Fall17-94X-V2-tight") << 2 |
+                   userdatahelpers::getUserInt(l1,"cutBasedElectronID-Fall17-94X-V2-medium") << 1 |
+                   userdatahelpers::getUserInt(l1,"cutBasedElectronID-Fall17-94X-V2-loose") << 0;
+    } else if(l1Type == classic_svFit::MeasuredTauLepton::kTauToMuDecay){
+      iso_l1_jet = userdatahelpers::getUserInt(l1,"muonID");
     }
 
     if(l2Type == classic_svFit::MeasuredTauLepton::kTauToHadDecay){
@@ -264,8 +274,16 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
                    userdatahelpers::getUserInt(l2,"byVLooseDeepTau2017v2p1VSjet") << 2 |
                    userdatahelpers::getUserInt(l2,"byVVLooseDeepTau2017v2p1VSjet") << 1 |
                    userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") << 0;
+    } else if(l2Type == classic_svFit::MeasuredTauLepton::kTauToElecDecay){
+      iso_l1_jet = userdatahelpers::getUserInt(l2,"cutBasedElectronID-Fall17-94X-V2-tight") << 2 |
+                   userdatahelpers::getUserInt(l2,"cutBasedElectronID-Fall17-94X-V2-medium") << 1 |
+                   userdatahelpers::getUserInt(l2,"cutBasedElectronID-Fall17-94X-V2-loose") << 0;
+    } else if(l2Type == classic_svFit::MeasuredTauLepton::kTauToMuDecay){
+      iso_l2_jet = userdatahelpers::getUserInt(l2,"muonID");
     }
 
+    tau1Isojet.push_back(l1_iso);
+    tau2Isojet.push_back(l2_iso);
     tau1IDjet.push_back(iso_l1_jet);
     tau2IDjet.push_back(iso_l2_jet);
 
@@ -536,6 +554,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("tau1Phi", 	tau1phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau1DM", 	tau1decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<int>("tau1IDjet", 	tau1IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
+  candTable->addColumn<int>("tau1Isojet", 	tau1Isojet	, 	"", nanoaod::FlatTable::IntColumn);
   candTable->addColumn<float>("tau2Mass", 	tau2mass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2pdgId", 	tau2pdgid 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2Pt", 	tau2pt 		, 	"", nanoaod::FlatTable::FloatColumn, 10);
@@ -543,6 +562,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("tau2Phi", 	tau2phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2DM", 	tau2decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<int>("tau2IDjet", 	tau2IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
+  candTable->addColumn<int>("tau2Isojet", 	tau2Isojet	, 	"", nanoaod::FlatTable::IntColumn);
 
   auto singleTable = std::make_unique<nanoaod::FlatTable>(1, SVFitName_+"MET", false); 
   singleTable->addColumn<float>("px", 		METxVec 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
@@ -661,15 +681,15 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     if (userdatahelpers::getUserInt(l2,"decayModeFindingNewDMs") != 1) // decayModeFinding == decayModeFindingOldDMs
       return false;
 
-    //bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.3);
+    bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.4);
     //bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.2); //Commented during March 2020 sync: inconsistency with KLUB
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVLooseIsolationMVArun2v1DBoldDMwLT") == 1);
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017") == 1); //FRA 2017
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") == 1);
     bool iso2 = (userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") == 1);
 
-    //if (!iso1 || !iso2)
-    if (!iso2)
+    if (!iso1 || !iso2)
+    //if (!iso2)
       return false;
 
     return true; // passed all requirements
@@ -684,6 +704,13 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
       return false;
 
     if (dau2->pt() < 10.)
+      return false;
+
+    bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.4);
+    bool iso2 = (userdatahelpers::getUserFloat(l2,"ElectronMVAEstimatorRun2Fall17IsoV1Values") < 0.3);
+
+    if (!iso1 || !iso2)
+    //if (!iso2)
       return false;
 
     return true; // passed all requirements
@@ -704,15 +731,15 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     if (userdatahelpers::getUserInt(l2,"decayModeFindingNewDMs") != 1)  // decayModeFinding == decayModeFindingOldDMs
       return false;
 
-    //bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.3);
+    bool iso1 = (userdatahelpers::getUserFloat(l1,"ElectronMVAEstimatorRun2Fall17IsoV1Values") < 0.3);
     //bool iso1 = (userdatahelpers::getUserFloat(l1,"combRelIsoPF") < 0.2); //Commented during March 2020 sync: inconsistency with KLUB
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVLooseIsolationMVArun2v1DBoldDMwLT") == 1);
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017") == 1); //FRA 2017
     //bool iso2 = (userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") == 1);
     bool iso2 = (userdatahelpers::getUserInt(l2,"byVVVLooseDeepTau2017v2p1VSjet") == 1);
 
-    //if (!iso1 || !iso2)
-    if (!iso2)
+    if (!iso1 || !iso2)
+    //if (!iso2)
       return false;
 
     return true; // passed all requirements
