@@ -212,6 +212,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   std::vector<float> SVfitMass, SVfitTransverseMass, SVpt, SVeta, SVphi, SVMETRho, SVMETPhi;
   std::vector<float> channel, tau1pt, tau1eta, tau1phi, tau1mass, tau1decaymode, tau1pdgid; 
   std::vector<float> tau2pt, tau2eta, tau2phi, tau2mass, tau2decaymode, tau2pdgid, tau1IDjet, tau2IDjet, tau1Isojet, tau2Isojet;
+  std::vector<float> tau2nupx, tau2nupy, tau2nupz, tau2nuE, tau1nupx, tau1nupy, tau1nupz, tau1nuE;
 
   // loop on all the pairs
   for (unsigned int i = 0; i < pairNumber; ++i)
@@ -469,6 +470,18 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
         tau2mass.push_back(measuredTauLeptons.at(1).mass());
         tau2decaymode.push_back(measuredTauLeptons.at(1).decayMode());
         tau2pdgid.push_back(measuredTauLeptons.at(1).type());
+        //get Neutrino 4Vec
+        double nuPx, nuPy, nuPz, nuE;
+        algo.getNu(0, nuPx, nuPy, nuPz, nuE);
+        tau1nupx.push_back(nuPx);
+        tau1nupy.push_back(nuPy);
+        tau1nupz.push_back(nuPz);
+        tau1nuE.push_back(nuE);
+        algo.getNu(1, nuPx, nuPy, nuPz, nuE);
+        tau2nupx.push_back(nuPx);
+        tau2nupy.push_back(nuPy);
+        tau2nupz.push_back(nuPz);
+        tau2nuE.push_back(nuE);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau1(l1->pt(), l1->eta(), l1->phi(), mass1);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau2(l2->pt(), l2->eta(), l2->phi(), mass2);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredDiTauSystem = measuredTau1 + measuredTau2;
@@ -498,6 +511,14 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
         tau2phi.push_back(-111);
         tau2mass.push_back(-111);
         tau2decaymode.push_back(-111);
+        tau1nupx.push_back(-111);
+        tau1nupy.push_back(-111);
+        tau1nupz.push_back(-111);
+        tau1nuE.push_back(-111);
+        tau2nupx.push_back(-111);
+        tau2nupy.push_back(-111);
+        tau2nupz.push_back(-111);
+        tau2nuE.push_back(-111);
       }
     } else {
       SVfitMass.push_back(-999); // -111: SVfit failed (cfr: -999: SVfit not computed)
@@ -520,6 +541,14 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
       tau2phi.push_back(-999);
       tau2mass.push_back(-999);
       tau2decaymode.push_back(-999);
+      tau1nupx.push_back(-999);
+      tau1nupy.push_back(-999);
+      tau1nupz.push_back(-999);
+      tau1nuE.push_back(-999);
+      tau2nupx.push_back(-999);
+      tau2nupy.push_back(-999);
+      tau2nupz.push_back(-999);
+      tau2nuE.push_back(-999);
     } // end of quality checks IF
   }// end for loop over pairs
   int _isValid = 0;
@@ -553,6 +582,10 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("tau1Eta", 	tau1eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau1Phi", 	tau1phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau1DM", 	tau1decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1nuPx", 	tau1nupx 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1nuPy", 	tau1nupy 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1nuPz", 	tau1nupz 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau1nuE", 	tau1nuE 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<int>("tau1IDjet", 	tau1IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
   candTable->addColumn<int>("tau1Isojet", 	tau1Isojet	, 	"", nanoaod::FlatTable::IntColumn);
   candTable->addColumn<float>("tau2Mass", 	tau2mass 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
@@ -561,6 +594,10 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   candTable->addColumn<float>("tau2Eta", 	tau2eta 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2Phi", 	tau2phi 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<float>("tau2DM", 	tau2decaymode 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2nuPx", 	tau2nupx 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2nuPy", 	tau2nupy 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2nuPz", 	tau2nupz 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
+  candTable->addColumn<float>("tau2nuE", 	tau2nuE 	, 	"", nanoaod::FlatTable::FloatColumn, 10);
   candTable->addColumn<int>("tau2IDjet", 	tau2IDjet 	, 	"", nanoaod::FlatTable::IntColumn);
   candTable->addColumn<int>("tau2Isojet", 	tau2Isojet	, 	"", nanoaod::FlatTable::IntColumn);
 
