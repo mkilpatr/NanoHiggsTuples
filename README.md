@@ -53,6 +53,60 @@ git cms-merge-topic -u hqucms:particle-net-onnx-variable-len
 git clone git@github.com:mkilpatr/NanoHiggsTuples.git PhysicsTools/NanoTuples
 ```
 
+### Get required submodules
+```
+git cms-init
+
+# MVA EleID Fall 2018
+git cms-merge-topic cms-egamma:EgammaPostRecoTools  #if you want the V2 IDs, otherwise skip
+
+# PU jet ID
+git cms-addpkg RecoJets/JetProducers
+git clone -b 94X_weights_DYJets_inc_v2 git@github.com:cms-jet/PUjetID.git PUJetIDweights/
+cp PUJetIDweights/weights/pileupJetId_{94,102}X_Eta* $CMSSW_BASE/src/RecoJets/JetProducers/data/
+rm -rf PUJetIDweights/
+git cms-merge-topic alefisico:PUID_102X
+
+# Z-recoil corrections
+git clone https://github.com/CMS-HTT/RecoilCorrections.git  HTT-utilities/RecoilCorrections
+
+# LLRHiggsTauTau framework
+git clone git@github.com:LLRCMS/LLRHiggsTauTau.git
+cd LLRHiggsTauTau
+git checkout 102X_HH
+cd -
+
+git clone -n https://github.com/latinos/UserCode-sixie-Muon-MuonAnalysisTools Muon/MuonAnalysisTools
+cd Muon/MuonAnalysisTools
+git checkout master -- interface/MuonEffectiveArea.h
+cd -
+
+git clone -n https://github.com/cms-analysis/EgammaAnalysis-ElectronTools EGamma/EGammaAnalysisTools
+cd EGamma/EGammaAnalysisTools
+git checkout c0db796 -- interface/ElectronEffectiveArea.h
+cd -
+
+# FSR corrections
+git clone -n https://github.com/VBF-HZZ/UFHZZAnalysisRun2
+cd UFHZZAnalysisRun2
+git checkout origin/102X FSRPhotons
+cd -
+
+# bad MET filter fix
+git cms-addpkg RecoMET/METFilters
+
+# SVfit
+git clone https://github.com/LLRCMS/ClassicSVfit.git TauAnalysis/ClassicSVfit -b bbtautau_LegacyRun2
+git clone https://github.com/svfit/SVfitTF TauAnalysis/SVfitTF
+
+#Add TauPOG corrections (TES and EES)
+git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
+
+#Add DeepTau code from Tau POG repository (note "-u" option preventing checkout of unnecessary stuff)
+git cms-merge-topic -u cms-tau-pog:CMSSW_10_2_X_tau-pog_DeepTau2017v2p1_nanoAOD
+
+```
+
 ### Install a faster version of ONNXRuntime
 
 ```bash
