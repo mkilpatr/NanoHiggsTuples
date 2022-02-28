@@ -55,8 +55,6 @@ git clone git@github.com:mkilpatr/NanoHiggsTuples.git PhysicsTools/NanoTuples
 
 ### Get required submodules
 ```
-git cms-init
-
 # MVA EleID Fall 2018
 git cms-merge-topic cms-egamma:EgammaPostRecoTools  #if you want the V2 IDs, otherwise skip
 
