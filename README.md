@@ -55,9 +55,6 @@ git clone git@github.com:mkilpatr/NanoHiggsTuples.git PhysicsTools/NanoTuples
 
 ### Get required submodules
 ```
-# MVA EleID Fall 2018
-git cms-merge-topic cms-egamma:EgammaPostRecoTools  #if you want the V2 IDs, otherwise skip
-
 # Z-recoil corrections
 git clone https://github.com/CMS-HTT/RecoilCorrections.git  HTT-utilities/RecoilCorrections
 
@@ -70,15 +67,11 @@ cd -
 git cms-addpkg RecoMET/METFilters
 
 # SVfit
-git clone https://github.com/LLRCMS/ClassicSVfit.git TauAnalysis/ClassicSVfit -b bbtautau_LegacyRun2
+git clone https://github.com/mkilpatr/ClassicSVfit.git TauAnalysis/ClassicSVfit -b bbtautau_nu4vec
 git clone https://github.com/svfit/SVfitTF TauAnalysis/SVfitTF
 
 #Add TauPOG corrections (TES and EES)
 git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
-
-#Add DeepTau code from Tau POG repository (note "-u" option preventing checkout of unnecessary stuff)
-git cms-merge-topic -u cms-tau-pog:CMSSW_10_2_X_tau-pog_DeepTau2017v2p1_nanoAOD
-
 ```
 
 ### Install a faster version of ONNXRuntime
